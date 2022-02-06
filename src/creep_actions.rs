@@ -1,0 +1,70 @@
+use log::*;
+use screeps::{prelude::*, ResourceType, ReturnCode};
+use std::cmp::min;
+
+pub fn upgrade_controller(
+    creep: screeps::objects::Creep,
+    controller: &screeps::objects::StructureController,
+) {
+    let r = creep.upgrade_controller(controller);
+    if r == ReturnCode::NotInRange {
+        creep.move_to(controller);
+    } else if r != ReturnCode::Ok {
+        warn!("couldn't upgrade: {:?}", r);
+    }
+}
+
+pub fn build(creep: screeps::objects::Creep, target_site: &screeps::objects::ConstructionSite) {
+    let r = creep.build(target_site);
+    if r == ReturnCode::NotInRange {
+        //info!("creep: {}, move to :{}", creep.name(), target_site.structure_type());
+        creep.move_to(target_site);
+    } else if r != ReturnCode::Ok {
+        warn!("couldn't build: {:?}", r);
+    }
+}
+
+pub fn fill(creep: &screeps::objects::Creep, fill_target: &screeps::objects::Structure) {
+    let transferable = fill_target.as_transferable().unwrap();
+    let has_store = fill_target.as_has_store().unwrap();
+
+    let empty_space = has_store.store_free_capacity(Some(ResourceType::Energy)) as u32;
+    let creep_energy = creep.energy();
+    let amount = min(creep_energy, empty_space);
+
+    let r = creep.transfer_amount(transferable, ResourceType::Energy, amount);
+    if r == ReturnCode::NotInRange {
+        creep.move_to(fill_target);
+    } else if r == ReturnCode::Full {
+        creep.memory().del("fill_target");
+    } else if r != ReturnCode::Ok {
+        warn!("couldn't transfer: {:?}", r);
+    }
+}
+
+pub fn harvest(creep: &screeps::objects::Creep) {
+    if creep.memory().bool("harvesting") {
+        if creep.store_free_capacity(Some(ResourceType::Energy)) == 0 {
+            creep.memory().set("harvesting", false);
+        }
+    } else {
+        if creep.store_used_capacity(None) == 0 {
+            creep.memory().set("harvesting", true);
+        }
+    }
+
+    if creep.memory().bool("harvesting") {
+        let source = &creep
+            .room()
+            .expect("room is not visible to you")
+            .find(screeps::constants::find::SOURCES)[0];
+        if creep.pos().is_near_to(source) {
+            let r = creep.harvest(source);
+            if r != ReturnCode::Ok {
+                warn!("couldn't harvest: {:?}", r);
+            }
+        } else {
+            creep.move_to(source);
+        }
+    }
+}

@@ -1,10 +1,14 @@
 use std::collections::HashSet;
 
 use log::*;
-use screeps::{find, prelude::*, Part, ResourceType, ReturnCode, RoomObjectProperties};
+use screeps::{find, prelude::*, ResourceType, ReturnCode, RoomObjectProperties};
 use stdweb::js;
 
 mod logging;
+mod goals;
+mod spawner;
+mod settler;
+mod creep_actions;
 
 fn main() {
     logging::setup_logging(logging::Info);
@@ -35,29 +39,9 @@ fn game_loop() {
     debug!("loop starting! CPU: {}", screeps::game::cpu::get_used());
 
     debug!("running spawns");
+    goals::set_goals();
     for spawn in screeps::game::spawns::values() {
-        debug!("running spawn {}", spawn.name());
-        let body = [Part::Move, Part::Move, Part::Carry, Part::Work];
-
-        if spawn.energy() >= body.iter().map(|p| p.cost()).sum() {
-            // create a unique name, spawn.
-            let name_base = screeps::game::time();
-            let mut additional = 0;
-            let res = loop {
-                let name = format!("{}-{}", name_base, additional);
-                let res = spawn.spawn_creep(&body, &name);
-
-                if res == ReturnCode::NameExists {
-                    additional += 1;
-                } else {
-                    break res;
-                }
-            };
-
-            if res != ReturnCode::Ok {
-                warn!("couldn't spawn: {:?}", res);
-            }
-        }
+        spawner::run_spawn(spawn);
     }
 
     debug!("running creeps");
@@ -65,6 +49,11 @@ fn game_loop() {
         let name = creep.name();
         debug!("running creep {}", name);
         if creep.spawning() {
+            continue;
+        }
+        let creep_type = creep.memory().string("type").unwrap_or(None);
+        if creep_type == Some("settler".to_string()) {
+            settler::run_settler(creep);
             continue;
         }
 
