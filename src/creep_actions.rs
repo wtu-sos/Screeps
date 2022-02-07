@@ -54,17 +54,32 @@ pub fn harvest(creep: &screeps::objects::Creep) {
     }
 
     if creep.memory().bool("harvesting") {
-        let source = &creep
-            .room()
-            .expect("room is not visible to you")
-            .find(screeps::constants::find::SOURCES)[0];
-        if creep.pos().is_near_to(source) {
-            let r = creep.harvest(source);
-            if r != ReturnCode::Ok {
-                warn!("couldn't harvest: {:?}", r);
+        if let Some(source) = &creep
+            .pos()
+            .find_closest_by_range(screeps::constants::find::SOURCES)
+        {
+            if creep.pos().is_near_to(source) {
+                let r = creep.harvest(source);
+                if r != ReturnCode::Ok {
+                    warn!("couldn't harvest: {:?}", r);
+                }
+            } else {
+                creep.move_to(source);
             }
-        } else {
-            creep.move_to(source);
         }
+        else {
+            warn!("can't find source ! creep: {}", creep.name());
+        }
+    }
+}
+
+pub fn repair(creep: &screeps::objects::Creep, target: &screeps::objects::Structure) {
+    info!("creep: {}, repair :{} id: {}, pos: {}", creep.name(), target.structure_type(), target.id(), target.pos());
+    let r = creep.repair(target);
+    if r == ReturnCode::NotInRange {
+        //info!("creep: {}, move to :{}", creep.name(), target_site.structure_type());
+        creep.move_to(target);
+    } else if r != ReturnCode::Ok {
+        warn!("couldn't repair: {:?}", r);
     }
 }

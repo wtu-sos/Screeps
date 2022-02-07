@@ -56,7 +56,19 @@ pub fn run_spawn(spawn: screeps::objects::StructureSpawn) {
 
 fn build_settler(spawn: screeps::objects::StructureSpawn) {
     let small = vec![Part::Move, Part::Move, Part::Carry, Part::Work];
-    if dry_run_build(&spawn, &small) {
+    let medium = vec![
+        Part::Move,
+        Part::Move,
+        Part::Move,
+        Part::Carry,
+        Part::Carry,
+        Part::Work,
+        Part::Work,
+        Part::Work,
+    ];
+    if dry_run_build(&spawn, &medium) {
+        build_creep(spawn, "settler", medium);
+    } else if dry_run_build(&spawn, &small) {
         build_creep(spawn, "settler", small);
     }
 }

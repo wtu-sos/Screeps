@@ -1,10 +1,12 @@
+use std::cmp::Ordering;
+
 use crate::{creep_actions};
 use log::*;
 use screeps::{find, prelude::*, ResourceType, ConstructionSite, objects::Attackable};
 
-pub fn run_settler(creep: screeps::objects::Creep) {
+pub fn run_harvest(creep: screeps::objects::Creep) {
     let name = creep.name();
-    debug!("running settler creep {}", name);
+    debug!("running harverster creep {}", name);
 
     if creep.spawning() {
         return;
@@ -24,7 +26,6 @@ fn spend_energy(creep: screeps::objects::Creep) {
     let structures = room.find(find::STRUCTURES);
     let mut towers: std::vec::Vec<screeps::objects::Structure> = vec![];
     let mut extensions: std::vec::Vec<screeps::objects::Structure> = vec![];
-    let mut walls: std::vec::Vec<screeps::objects::Structure> = vec![];
     for my_structure in structures {
         match my_structure {
             screeps::Structure::Tower(ref my_tower) => {
@@ -37,25 +38,14 @@ fn spend_energy(creep: screeps::objects::Creep) {
                     extensions.push(my_structure);
                 }
             }
-            screeps::Structure::Wall(ref my_wall) => {
-                let hits = my_wall.hits() as f32;
-                let hits_max = my_wall.hits_max() as f32;
-                if hits  < hits_max * 0.9f32 {
-                    walls.push(my_structure);
-                }
-            }
             _ => (),
         };
     }
-    debug!("settler spend info： tower: {}, extension: {}, construction_sites: {}", towers.len(), extensions.len(), construction_sites.len());
-    if construction_sites.len() > 0 {
-        creep_actions::build(creep, &construction_sites[0]);
+    debug!("harvester spend info： tower: {}, extension: {}, construction_sites: {}", towers.len(), extensions.len(), construction_sites.len());
+    if extensions.len() > 0 {
+        creep_actions::fill(&creep, &extensions[0]);
     } else if towers.len() > 0 {
         creep_actions::fill(&creep, &towers[0]);
-    } else if walls.len() > 0 {
-        creep_actions::repair(&creep, &walls[0]);
-    } else if extensions.len() > 0 {
-        creep_actions::fill(&creep, &extensions[0]);
     } else {
         creep_actions::upgrade_controller(creep, &room.controller().unwrap());
     };
