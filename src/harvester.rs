@@ -1,8 +1,6 @@
-use std::cmp::Ordering;
-
 use crate::{creep_actions};
 use log::*;
-use screeps::{find, prelude::*, ResourceType, ConstructionSite, objects::Attackable};
+use screeps::{find, prelude::*, ResourceType, ConstructionSite};
 
 pub fn run_harvest(creep: screeps::objects::Creep) {
     let name = creep.name();

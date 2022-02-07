@@ -5,7 +5,7 @@ pub fn set_goals() {
 
     mem.path_set("spawn_goals.E3S24.harvester", 5);
     mem.path_set("spawn_goals.E3S24.filler", 0);
-    mem.path_set("spawn_goals.E3S24.upgrader", 0);
+    mem.path_set("spawn_goals.E3S24.upgrader", 2);
     mem.path_set("spawn_goals.E3S24.settler", 5);
     mem.path_set("spawn_goals.E3S24.reserver", 0);
 }

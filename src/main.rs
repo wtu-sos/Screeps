@@ -11,6 +11,7 @@ mod settler;
 mod creep_actions;
 mod tower;
 mod harvester;
+mod upgrader;
 
 fn main() {
     logging::setup_logging(logging::Info);
@@ -79,6 +80,9 @@ fn game_loop() {
                     },
                     "harvester" => {
                         harvester::run_harvest(creep);
+                    }
+                    "upgrader" => {
+                        upgrader::run_upgrader(creep);    
                     }
                     _ => {
                         warn!("creep {} not in control", t);
