@@ -53,7 +53,13 @@ fn spend_energy(creep: screeps::objects::Creep) {
     } else if towers.len() > 0 {
         creep_actions::fill(&creep, &towers[0]);
     } else if walls.len() > 0 {
-        creep_actions::repair(&creep, &walls[0]);
+        let mut target = &walls[0];
+        for r in walls.iter() {
+            if r.as_attackable().unwrap().hits() < target.as_attackable().unwrap().hits() {
+                target = r;
+            }
+        }
+        creep_actions::repair(&creep, target);
     } else if extensions.len() > 0 {
         creep_actions::fill(&creep, &extensions[0]);
     } else {

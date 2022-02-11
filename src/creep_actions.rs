@@ -54,20 +54,19 @@ pub fn harvest(creep: &screeps::objects::Creep) {
     }
 
     if creep.memory().bool("harvesting") {
-        if let Some(source) = &creep
-            .pos()
-            .find_closest_by_range(screeps::constants::find::SOURCES)
-        {
-            if creep.pos().is_near_to(source) {
-                let r = creep.harvest(source);
+        //if let Some(source) = &creep
+        //    .pos()
+        //    .find_closest_by_range(screeps::constants::find::SOURCES)
+        if let Some(source) = find_source(creep) {
+            if creep.pos().is_near_to(&source) {
+                let r = creep.harvest(&source);
                 if r != ReturnCode::Ok {
                     warn!("couldn't harvest: {:?}", r);
                 }
             } else {
-                creep.move_to(source);
+                creep.move_to(&source);
             }
-        }
-        else {
+        } else {
             warn!("can't find source ! creep: {}", creep.name());
         }
     }
@@ -81,5 +80,21 @@ pub fn repair(creep: &screeps::objects::Creep, target: &screeps::objects::Struct
         creep.move_to(target);
     } else if r != ReturnCode::Ok {
         warn!("couldn't repair: {:?}", r);
+    }
+}
+
+fn find_source(creep: &screeps::objects::Creep) -> Option<screeps::Source> {
+    let sources = creep.room().unwrap().find(screeps::constants::find::SOURCES);
+    if sources.len() == 0 {
+        return None;
+    }
+    if let Ok(creep_type) = creep.memory().string("type") {
+        if creep_type.unwrap_or("harvester".to_string()) != "harvester" {
+            return Some(sources[0].clone());
+        } else {
+            return sources.last().map(|s|s.clone());
+        }
+    } else {
+        return creep.pos().find_closest_by_range(screeps::constants::find::SOURCES);
     }
 }

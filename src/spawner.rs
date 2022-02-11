@@ -199,9 +199,10 @@ fn build_creep(
     let name_base = screeps::game::time();
     let mut additional = 0;
     let res = loop {
-        let name = format!("{}-{}", name_base, additional);
+        let name = format!("{}-{}-{}", creep_type, name_base, additional);
         let mem = MemoryReference::new();
         mem.set("type", creep_type);
+        mem.set("source", if creep_type == "harvester" {"5bbcad1b9099fc012e636a20"} else {"5bbcad1b9099fc012e636a1f"});
         let options = SpawnOptions::new().memory(mem);
         let res = spawn.spawn_creep_with_options(&body, &name, &options);
 

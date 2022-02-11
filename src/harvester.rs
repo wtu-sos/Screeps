@@ -27,7 +27,7 @@ fn spend_energy(creep: screeps::objects::Creep) {
     for my_structure in structures {
         match my_structure {
             screeps::Structure::Tower(ref my_tower) => {
-                if my_tower.store_free_capacity(Some(ResourceType::Energy)) > 0 {
+                if my_tower.energy() * 2 < my_tower.store_capacity(Some(screeps::ResourceType::Energy)) {
                     towers.push(my_structure);
                 }
             }
@@ -42,8 +42,8 @@ fn spend_energy(creep: screeps::objects::Creep) {
     debug!("harvester spend info： tower: {}, extension: {}, construction_sites: {}", towers.len(), extensions.len(), construction_sites.len());
     if extensions.len() > 0 {
         creep_actions::fill(&creep, &extensions[0]);
-    } else if towers.len() > 0 {
-        creep_actions::fill(&creep, &towers[0]);
+    //} else if towers.len() > 0 {
+    //    creep_actions::fill(&creep, &towers[0]);
     } else {
         creep_actions::upgrade_controller(creep, &room.controller().unwrap());
     };
