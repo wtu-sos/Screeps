@@ -73,7 +73,7 @@ pub fn harvest(creep: &screeps::objects::Creep) {
 }
 
 pub fn repair(creep: &screeps::objects::Creep, target: &screeps::objects::Structure) {
-    info!("creep: {}, repair :{} id: {}, pos: {}", creep.name(), target.structure_type(), target.id(), target.pos());
+    //info!("creep: {}, repair :{} id: {}, pos: {}", creep.name(), target.structure_type(), target.id(), target.pos());
     let r = creep.repair(target);
     if r == ReturnCode::NotInRange {
         //info!("creep: {}, move to :{}", creep.name(), target_site.structure_type());

@@ -1,7 +1,7 @@
 use std::collections::HashSet;
 
 use log::*;
-use screeps::{find, prelude::*};
+use screeps::{find, prelude::*, ReturnCode};
 use stdweb::js;
 
 mod logging;
@@ -39,8 +39,7 @@ fn main() {
 }
 
 fn game_loop() {
-    debug!("loop starting! CPU: {}", screeps::game::cpu::get_used());
-
+    //debug!("loop starting! CPU: {}", screeps::game::cpu::get_used());
     debug!("running spawns");
     goals::set_goals();
     for spawn in screeps::game::spawns::values() {
@@ -95,13 +94,21 @@ fn game_loop() {
     }
 
     let time = screeps::game::time();
+    let cpu_bucket = screeps::game::cpu::bucket();
 
     if time % 32 == 3 {
         info!("running memory cleanup");
         cleanup_memory().expect("expected Memory.creeps format to be a regular memory object");
     }
 
-    info!("done! cpu: {}", screeps::game::cpu::get_used())
+    if cpu_bucket >= screeps::PIXEL_CPU_COST {
+        let r = screeps::game::cpu::generate_pixel();
+        if ReturnCode::Ok != r {
+            info!("screeps::game::cpu::generate_pixel error! result: {:?}, cpu count: {}", r, cpu_bucket);
+        }
+    }
+
+    info!("done! cpu: {}, bucket: {}", screeps::game::cpu::get_used(), cpu_bucket)
 }
 
 fn cleanup_memory() -> Result<(), Box<dyn std::error::Error>> {
